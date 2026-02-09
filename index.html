@@ -402,28 +402,11 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📊 Forex Scorecard - Google Sheets</h1>
+            <h1>📊 Forex Fundamental Scorecard</h1>
             <div class="controls">
-                <button class="btn" onclick="toggleInstructions()">📖 Instructions</button>
-                <button class="btn btn-primary" onclick="loadData()" id="loadBtn">🔄 Load Data</button>
+                <button class="btn btn-primary" onclick="loadData()" id="loadBtn">🔄 Refresh Data</button>
                 <button class="btn" onclick="sortByScore()">📈 Sort by Score</button>
             </div>
-        </div>
-
-        <div class="instructions" id="instructions" style="display: none;">
-            <h3>🚀 Quick Setup Guide</h3>
-            <ol>
-                <li>Open <a href="https://docs.google.com/spreadsheets" target="_blank">Google Sheets</a> and create a new spreadsheet</li>
-                <li>Name it "Forex Scorecard" (sau cum vrei tu)</li>
-                <li>Click "Share" → "Anyone with the link" → "Viewer"</li>
-                <li>Copy the Spreadsheet ID from the URL (partea dintre /d/ și /edit)</li>
-                <li>Paste ID-ul mai jos și click "Save & Load"</li>
-                <li>Follow the spreadsheet format (vezi exemplul mai jos)</li>
-            </ol>
-            <p style="margin-top: 10px; color: #718096;">
-                📝 <strong>Spreadsheet Format:</strong> First row = headers, Column A = Symbol, Column B = Bias, 
-                Columns C onwards = scores (-2, -1, 0, 1, 2)
-            </p>
         </div>
 
         <div class="status-bar">
@@ -436,14 +419,16 @@
             </div>
         </div>
 
-        <div class="config-section">
+        <div class="config-section" id="apiConfig" style="display: none;">
             <h3>Google Sheets Configuration</h3>
-            <div class="input-wrapper">
-                <label>Spreadsheet ID</label>
-                <input type="text" id="spreadsheetId" placeholder="Ex: 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms">
-                <div class="help-text">
-                    💡 Găsești ID-ul în URL-ul spreadsheet-ului: 
-                    https://docs.google.com/spreadsheets/d/<strong>SPREADSHEET_ID</strong>/edit
+            <div class="api-input-group">
+                <div class="input-wrapper">
+                    <label>Spreadsheet ID</label>
+                    <input type="text" id="spreadsheetId" placeholder="Ex: 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms">
+                    <div class="help-text">
+                        💡 Găsești ID-ul în URL-ul spreadsheet-ului: 
+                        https://docs.google.com/spreadsheets/d/<strong>SPREADSHEET_ID</strong>/edit
+                    </div>
                 </div>
             </div>
             <button class="btn btn-primary" onclick="saveAndLoad()">💾 Save & Load Data</button>
@@ -486,7 +471,7 @@
                 <tbody id="tableBody">
                     <tr>
                         <td colspan="21" style="text-align: center; padding: 40px;">
-                            👆 Configure Google Sheets ID above and click "Save & Load Data"
+                            ⟳ Loading data automatically...
                         </td>
                     </tr>
                 </tbody>
@@ -521,6 +506,20 @@
 
     <script>
         let forexData = [];
+        
+        // Hardcoded Spreadsheet ID - your permanent spreadsheet
+        const SPREADSHEET_ID = '1hKq-Slzo-FMO9OXMvLJx-Ex4p0fU_OnJzRx1biNanw0';
+
+        // Auto-load on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            // Set the spreadsheet ID in the input field (hidden now)
+            document.getElementById('spreadsheetId').value = SPREADSHEET_ID;
+            
+            // Auto-load data after 500ms delay
+            setTimeout(function() {
+                loadData();
+            }, 500);
+        });
 
         // Load saved spreadsheet ID
         function loadSavedConfig() {
@@ -549,13 +548,8 @@
         }
 
         async function loadData() {
-            const spreadsheetId = document.getElementById('spreadsheetId').value.trim();
-            
-            if (!spreadsheetId) {
-                showToast('Please enter a Spreadsheet ID first!', 'error');
-                document.getElementById('instructions').style.display = 'block';
-                return;
-            }
+            // Use hardcoded spreadsheet ID
+            const spreadsheetId = SPREADSHEET_ID;
 
             const loadBtn = document.getElementById('loadBtn');
             loadBtn.disabled = true;
@@ -589,7 +583,7 @@
                 showToast('Error loading data. Make sure the spreadsheet is public!', 'error');
             } finally {
                 loadBtn.disabled = false;
-                loadBtn.textContent = '🔄 Load Data';
+                loadBtn.textContent = '🔄 Refresh Data';
             }
         }
 
