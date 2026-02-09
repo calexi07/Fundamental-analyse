@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Automated Forex Scorecard - Live Data</title>
+    <title>Forex Scorecard - Google Sheets</title>
     <style>
         * {
             margin: 0;
@@ -100,51 +100,36 @@
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            background: #ef4444;
-            animation: pulse 2s infinite;
-        }
-
-        .status-dot.active {
             background: #10b981;
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .api-config {
+        .config-section {
             background: #2d3143;
             padding: 20px 30px;
             border-bottom: 1px solid #3a3f5c;
         }
 
-        .api-config h3 {
+        .config-section h3 {
             margin-bottom: 15px;
             color: #cbd5e0;
         }
 
-        .api-input-group {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 15px;
+        .input-wrapper {
             margin-bottom: 15px;
         }
 
-        .input-wrapper {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
         .input-wrapper label {
+            display: block;
             font-size: 12px;
             color: #a0aec0;
+            margin-bottom: 5px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         .input-wrapper input {
+            width: 100%;
+            max-width: 800px;
             padding: 10px;
             background: #1a1d29;
             border: 1px solid #3a3f5c;
@@ -161,16 +146,7 @@
         .help-text {
             font-size: 12px;
             color: #718096;
-            margin-top: 10px;
-        }
-
-        .help-text a {
-            color: #3b82f6;
-            text-decoration: none;
-        }
-
-        .help-text a:hover {
-            text-decoration: underline;
+            margin-top: 5px;
         }
 
         .table-wrapper {
@@ -248,12 +224,34 @@
 
         td.score-cell {
             font-weight: 700;
-            font-size: 14px;
+            font-size: 16px;
             background: #2d3143;
             position: sticky;
             left: 240px;
             z-index: 50;
         }
+
+        .weighted-score {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        /* Gradient colors for weighted scores */
+        .score-extreme-bullish { background: linear-gradient(135deg, #047857, #065f46); color: white; }
+        .score-very-bullish { background: linear-gradient(135deg, #059669, #047857); color: white; }
+        .score-bullish { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+        .score-mod-bullish { background: linear-gradient(135deg, #34d399, #10b981); color: #1a1d29; }
+        .score-slight-bullish { background: linear-gradient(135deg, #6ee7b7, #34d399); color: #1a1d29; }
+        .score-neutral { background: #4b5563; color: #d1d5db; }
+        .score-slight-bearish { background: linear-gradient(135deg, #fca5a5, #f87171); color: #1a1d29; }
+        .score-mod-bearish { background: linear-gradient(135deg, #f87171, #ef4444); color: white; }
+        .score-bearish { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
+        .score-very-bearish { background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; }
+        .score-extreme-bearish { background: linear-gradient(135deg, #b91c1c, #7f1d1d); color: white; }
 
         .bias-very-bullish { color: #10b981; }
         .bias-bullish { color: #34d399; }
@@ -294,21 +292,6 @@
             display: block;
             padding: 4px;
             border-radius: 4px;
-        }
-
-        .loading {
-            opacity: 0.6;
-            position: relative;
-        }
-
-        .loading::after {
-            content: '⟳';
-            animation: spin 1s linear infinite;
-            font-size: 16px;
-        }
-
-        @keyframes spin {
-            100% { transform: rotate(360deg); }
         }
 
         tr:hover td:not(.symbol-cell):not(.bias-cell):not(.score-cell) {
@@ -352,46 +335,6 @@
             border-top: 1px solid #3a3f5c;
         }
 
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: #2d3143;
-            padding: 30px;
-            border-radius: 12px;
-            max-width: 600px;
-            width: 90%;
-            color: #e4e4e7;
-        }
-
-        .modal-content h2 {
-            margin-bottom: 20px;
-            color: #cbd5e0;
-        }
-
-        .modal-content ul {
-            margin-left: 20px;
-            line-height: 1.8;
-        }
-
-        .modal-content .btn {
-            margin-top: 20px;
-        }
-
         .toast {
             position: fixed;
             bottom: 20px;
@@ -428,24 +371,64 @@
                 opacity: 1;
             }
         }
+
+        .instructions {
+            background: #343849;
+            padding: 20px 30px;
+            border-bottom: 1px solid #3a3f5c;
+        }
+
+        .instructions h3 {
+            color: #cbd5e0;
+            margin-bottom: 10px;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+            line-height: 1.8;
+            color: #a0aec0;
+        }
+
+        .instructions a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+
+        .instructions a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>📊 Automated Forex Scorecard - Live Data</h1>
+            <h1>📊 Forex Scorecard - Google Sheets</h1>
             <div class="controls">
-                <button class="btn" onclick="toggleApiConfig()">⚙️ API Settings</button>
-                <button class="btn btn-primary" onclick="refreshAllData()" id="refreshBtn">🔄 Refresh Data</button>
+                <button class="btn" onclick="toggleInstructions()">📖 Instructions</button>
+                <button class="btn btn-primary" onclick="loadData()" id="loadBtn">🔄 Load Data</button>
                 <button class="btn" onclick="sortByScore()">📈 Sort by Score</button>
-                <button class="btn" onclick="exportToCSV()">💾 Export CSV</button>
-                <button class="btn" onclick="showHelp()">❓ Help</button>
             </div>
+        </div>
+
+        <div class="instructions" id="instructions" style="display: none;">
+            <h3>🚀 Quick Setup Guide</h3>
+            <ol>
+                <li>Open <a href="https://docs.google.com/spreadsheets" target="_blank">Google Sheets</a> and create a new spreadsheet</li>
+                <li>Name it "Forex Scorecard" (sau cum vrei tu)</li>
+                <li>Click "Share" → "Anyone with the link" → "Viewer"</li>
+                <li>Copy the Spreadsheet ID from the URL (partea dintre /d/ și /edit)</li>
+                <li>Paste ID-ul mai jos și click "Save & Load"</li>
+                <li>Follow the spreadsheet format (vezi exemplul mai jos)</li>
+            </ol>
+            <p style="margin-top: 10px; color: #718096;">
+                📝 <strong>Spreadsheet Format:</strong> First row = headers, Column A = Symbol, Column B = Bias, 
+                Columns C onwards = scores (-2, -1, 0, 1, 2)
+            </p>
         </div>
 
         <div class="status-bar">
             <div class="status-indicator">
-                <div class="status-dot" id="statusDot"></div>
+                <div class="status-dot"></div>
                 <span id="statusText">Ready to load data</span>
             </div>
             <div class="update-info">
@@ -453,30 +436,17 @@
             </div>
         </div>
 
-        <div class="api-config" id="apiConfig" style="display: none;">
-            <h3>API Configuration</h3>
-            <div class="api-input-group">
-                <div class="input-wrapper">
-                    <label>Alpha Vantage API Key</label>
-                    <input type="text" id="alphaVantageKey" placeholder="Get free key from alphavantage.co">
-                </div>
-                <div class="input-wrapper">
-                    <label>FRED API Key (Optional)</label>
-                    <input type="text" id="fredKey" placeholder="Get free key from fred.stlouisfed.org">
-                </div>
-                <div class="input-wrapper">
-                    <label>TradingView (Future)</label>
-                    <input type="text" id="tradingViewKey" placeholder="Coming soon" disabled>
+        <div class="config-section">
+            <h3>Google Sheets Configuration</h3>
+            <div class="input-wrapper">
+                <label>Spreadsheet ID</label>
+                <input type="text" id="spreadsheetId" placeholder="Ex: 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms">
+                <div class="help-text">
+                    💡 Găsești ID-ul în URL-ul spreadsheet-ului: 
+                    https://docs.google.com/spreadsheets/d/<strong>SPREADSHEET_ID</strong>/edit
                 </div>
             </div>
-            <div class="help-text">
-                📝 Get free API keys:
-                <a href="https://www.alphavantage.co/support/#api-key" target="_blank">Alpha Vantage</a> |
-                <a href="https://fred.stlouisfed.org/docs/api/api_key.html" target="_blank">FRED</a>
-                <br>
-                💡 Keys are stored locally in your browser (localStorage)
-            </div>
-            <button class="btn btn-primary" onclick="saveApiKeys()">Save Keys</button>
+            <button class="btn btn-primary" onclick="saveAndLoad()">💾 Save & Load Data</button>
         </div>
 
         <div class="table-wrapper">
@@ -516,7 +486,7 @@
                 <tbody id="tableBody">
                     <tr>
                         <td colspan="21" style="text-align: center; padding: 40px;">
-                            Click "Refresh Data" to load live market data
+                            👆 Configure Google Sheets ID above and click "Save & Load Data"
                         </td>
                     </tr>
                 </tbody>
@@ -547,308 +517,151 @@
         </div>
     </div>
 
-    <div class="modal" id="helpModal">
-        <div class="modal-content">
-            <h2>🚀 How to Use This Automated Scorecard</h2>
-            <ul>
-                <li><strong>Get API Keys:</strong> Sign up for free API keys from Alpha Vantage and FRED</li>
-                <li><strong>Configure:</strong> Click "API Settings" and enter your keys</li>
-                <li><strong>Refresh:</strong> Click "Refresh Data" to load live market data</li>
-                <li><strong>Auto-Scoring:</strong> Scores are calculated automatically based on:
-                    <ul>
-                        <li>Technical indicators (moving averages, RSI, trend)</li>
-                        <li>Economic data (GDP, inflation, employment)</li>
-                        <li>Sentiment indicators (market positioning)</li>
-                    </ul>
-                </li>
-                <li><strong>Trading Signals:</strong> Higher positive scores = bullish, negative scores = bearish</li>
-                <li><strong>Export:</strong> Save data as CSV for further analysis</li>
-            </ul>
-            <button class="btn" onclick="closeHelp()">Got it!</button>
-        </div>
-    </div>
-
     <div class="toast" id="toast"></div>
 
     <script>
-        // Configuration
-        const CURRENCY_PAIRS = ['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'NZDUSD', 'USDCHF'];
-        const CURRENCIES = ['EUR', 'USD', 'GBP', 'JPY', 'AUD', 'CAD', 'NZD', 'CHF'];
-        
         let forexData = [];
-        let apiKeys = {
-            alphaVantage: '',
-            fred: ''
-        };
 
-        // Load API keys from localStorage
-        function loadApiKeys() {
-            const saved = localStorage.getItem('forexApiKeys');
-            if (saved) {
-                apiKeys = JSON.parse(saved);
-                document.getElementById('alphaVantageKey').value = apiKeys.alphaVantage || '';
-                document.getElementById('fredKey').value = apiKeys.fred || '';
+        // Load saved spreadsheet ID
+        function loadSavedConfig() {
+            const savedId = localStorage.getItem('spreadsheetId');
+            if (savedId) {
+                document.getElementById('spreadsheetId').value = savedId;
             }
         }
 
-        function saveApiKeys() {
-            apiKeys.alphaVantage = document.getElementById('alphaVantageKey').value;
-            apiKeys.fred = document.getElementById('fredKey').value;
-            localStorage.setItem('forexApiKeys', JSON.stringify(apiKeys));
-            showToast('API keys saved successfully!', 'success');
-            toggleApiConfig();
+        function toggleInstructions() {
+            const instructions = document.getElementById('instructions');
+            instructions.style.display = instructions.style.display === 'none' ? 'block' : 'none';
         }
 
-        function toggleApiConfig() {
-            const config = document.getElementById('apiConfig');
-            config.style.display = config.style.display === 'none' ? 'block' : 'none';
-        }
-
-        function showHelp() {
-            document.getElementById('helpModal').classList.add('active');
-        }
-
-        function closeHelp() {
-            document.getElementById('helpModal').classList.remove('active');
-        }
-
-        function showToast(message, type = 'info') {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.className = `toast show ${type}`;
-            setTimeout(() => toast.classList.remove('show'), 3000);
-        }
-
-        function updateStatus(text, active = false) {
-            document.getElementById('statusText').textContent = text;
-            document.getElementById('statusDot').classList.toggle('active', active);
-        }
-
-        function updateTime() {
-            const now = new Date();
-            const timeString = now.toLocaleString('en-US', { 
-                year: 'numeric', 
-                month: 'short', 
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
-            document.getElementById('updateTime').textContent = timeString;
-        }
-
-        // Calculate technical score based on price data
-        function calculateTechnicalScore(priceData) {
-            if (!priceData || priceData.length === 0) return { trend: 0, seasonality: 0 };
+        function saveAndLoad() {
+            const spreadsheetId = document.getElementById('spreadsheetId').value.trim();
             
-            // Simple moving average trend
-            const sma20 = priceData.slice(0, 20).reduce((a, b) => a + b, 0) / 20;
-            const sma50 = priceData.slice(0, 50).reduce((a, b) => a + b, 0) / Math.min(50, priceData.length);
-            const currentPrice = priceData[0];
-            
-            let trend = 0;
-            if (currentPrice > sma20 && sma20 > sma50) trend = 2;
-            else if (currentPrice > sma20) trend = 1;
-            else if (currentPrice < sma20 && sma20 < sma50) trend = -2;
-            else if (currentPrice < sma20) trend = -1;
-            
-            // Seasonality based on month (simplified)
-            const month = new Date().getMonth();
-            const seasonality = Math.floor(Math.random() * 5) - 2; // Placeholder
-            
-            return { trend, seasonality };
-        }
-
-        // Calculate economic score based on indicators
-        function calculateEconomicScore(economicData) {
-            const gdp = economicData.gdp || 0;
-            const inflation = economicData.inflation || 0;
-            const employment = economicData.employment || 0;
-            
-            return {
-                gdp: gdp > 3 ? 2 : gdp > 2 ? 1 : gdp < 0 ? -2 : gdp < 1 ? -1 : 0,
-                mpmi: Math.floor(Math.random() * 5) - 2, // Placeholder
-                spmi: Math.floor(Math.random() * 5) - 2, // Placeholder
-                retail: Math.floor(Math.random() * 5) - 2,
-                consumer: Math.floor(Math.random() * 5) - 2,
-                cpi: inflation > 3 ? 2 : inflation > 2 ? 1 : inflation < 1 ? -1 : 0,
-                ppi: Math.floor(Math.random() * 5) - 2,
-                pce: Math.floor(Math.random() * 5) - 2,
-                rates: Math.floor(Math.random() * 5) - 2,
-                nfp: employment > 200 ? 2 : employment > 100 ? 1 : employment < 0 ? -2 : employment < 50 ? -1 : 0,
-                unemployment: Math.floor(Math.random() * 5) - 2,
-                claims: Math.floor(Math.random() * 5) - 2,
-                adp: Math.floor(Math.random() * 5) - 2,
-                jolts: Math.floor(Math.random() * 5) - 2
-            };
-        }
-
-        // Fetch forex price data from Alpha Vantage
-        async function fetchForexData(fromCurrency, toCurrency) {
-            if (!apiKeys.alphaVantage) {
-                throw new Error('Alpha Vantage API key not configured');
+            if (!spreadsheetId) {
+                showToast('Please enter a Spreadsheet ID!', 'error');
+                return;
             }
-
-            const url = `https://www.alphavantage.co/query?function=FX_DAILY&from_symbol=${fromCurrency}&to_symbol=${toCurrency}&apikey=${apiKeys.alphaVantage}`;
             
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-                
-                if (data['Error Message']) {
-                    throw new Error('Invalid API call');
-                }
-                
-                if (data['Note']) {
-                    throw new Error('API rate limit reached');
-                }
-                
-                const timeSeries = data['Time Series FX (Daily)'];
-                if (!timeSeries) {
-                    throw new Error('No data available');
-                }
-                
-                const prices = Object.values(timeSeries).map(day => parseFloat(day['4. close']));
-                return prices;
-            } catch (error) {
-                console.error(`Error fetching ${fromCurrency}/${toCurrency}:`, error);
-                return [];
-            }
+            localStorage.setItem('spreadsheetId', spreadsheetId);
+            showToast('Configuration saved!', 'success');
+            loadData();
         }
 
-        // Fetch economic data (simplified - in real world, use multiple APIs)
-        async function fetchEconomicData(currency) {
-            // This is a simplified version - you would fetch real data from FRED, Trading Economics, etc.
-            return {
-                gdp: Math.random() * 5 - 1, // -1 to 4
-                inflation: Math.random() * 4 + 1, // 1 to 5
-                employment: Math.random() * 300 - 50 // -50 to 250
-            };
-        }
-
-        // Generate complete scorecard for a currency pair
-        async function generateScorecard(pair) {
-            const fromCurrency = pair.substring(0, 3);
-            const toCurrency = pair.substring(3, 6);
+        async function loadData() {
+            const spreadsheetId = document.getElementById('spreadsheetId').value.trim();
             
-            try {
-                // Fetch data
-                const priceData = await fetchForexData(fromCurrency, toCurrency);
-                const economicData = await fetchEconomicData(fromCurrency);
-                
-                // Calculate scores
-                const technical = calculateTechnicalScore(priceData);
-                const economic = calculateEconomicScore(economicData);
-                
-                // Sentiment scores (placeholder - would need COT data)
-                const sentiment = {
-                    cot: Math.floor(Math.random() * 5) - 2,
-                    crowd: Math.floor(Math.random() * 5) - 2
-                };
-                
-                // Compile all scores
-                const allScores = [
-                    technical.trend,
-                    technical.seasonality,
-                    sentiment.cot,
-                    sentiment.crowd,
-                    economic.gdp,
-                    economic.mpmi,
-                    economic.spmi,
-                    economic.retail,
-                    economic.consumer,
-                    economic.cpi,
-                    economic.ppi,
-                    economic.pce,
-                    economic.rates,
-                    economic.nfp,
-                    economic.unemployment,
-                    economic.claims,
-                    economic.adp,
-                    economic.jolts
-                ];
-                
-                const totalScore = allScores.reduce((a, b) => a + b, 0);
-                
-                let bias = 'Neutral';
-                if (totalScore >= 10) bias = 'Very Bullish';
-                else if (totalScore >= 5) bias = 'Bullish';
-                else if (totalScore <= -10) bias = 'Very Bearish';
-                else if (totalScore <= -5) bias = 'Bearish';
-                
-                return {
-                    symbol: pair,
-                    bias: bias,
-                    score: totalScore,
-                    data: allScores
-                };
-            } catch (error) {
-                console.error(`Error generating scorecard for ${pair}:`, error);
-                return null;
-            }
-        }
-
-        // Refresh all data
-        async function refreshAllData() {
-            if (!apiKeys.alphaVantage) {
-                showToast('Please configure API keys first!', 'error');
-                toggleApiConfig();
+            if (!spreadsheetId) {
+                showToast('Please enter a Spreadsheet ID first!', 'error');
+                document.getElementById('instructions').style.display = 'block';
                 return;
             }
 
-            const refreshBtn = document.getElementById('refreshBtn');
-            refreshBtn.disabled = true;
-            refreshBtn.textContent = '⟳ Loading...';
+            const loadBtn = document.getElementById('loadBtn');
+            loadBtn.disabled = true;
+            loadBtn.textContent = '⟳ Loading...';
             
-            updateStatus('Fetching live market data...', true);
-            forexData = [];
-            
-            // Show loading state
-            document.getElementById('tableBody').innerHTML = `
-                <tr>
-                    <td colspan="21" style="text-align: center; padding: 40px;">
-                        <div class="loading">Loading data from APIs...</div>
-                    </td>
-                </tr>
-            `;
-            
+            updateStatus('Loading data from Google Sheets...');
+
             try {
-                // Fetch data for each pair with delay to avoid rate limiting
-                for (let i = 0; i < CURRENCY_PAIRS.length; i++) {
-                    const pair = CURRENCY_PAIRS[i];
-                    updateStatus(`Loading ${pair}... (${i + 1}/${CURRENCY_PAIRS.length})`);
-                    
-                    const scorecard = await generateScorecard(pair);
-                    if (scorecard) {
-                        forexData.push(scorecard);
-                        renderTable(); // Update table progressively
-                    }
-                    
-                    // Delay between API calls (Alpha Vantage free tier: 5 calls per minute)
-                    if (i < CURRENCY_PAIRS.length - 1) {
-                        await new Promise(resolve => setTimeout(resolve, 12000));
-                    }
+                // Google Sheets public API URL (no authentication needed for public sheets)
+                const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json`;
+                
+                const response = await fetch(url);
+                const text = await response.text();
+                
+                // Parse Google Sheets JSON response (it's wrapped in a function call)
+                const json = JSON.parse(text.substr(47).slice(0, -2));
+                
+                if (!json.table || !json.table.rows) {
+                    throw new Error('Invalid spreadsheet format');
                 }
                 
+                forexData = parseSheetData(json.table.rows);
+                renderTable();
                 updateTime();
-                updateStatus('Data loaded successfully', true);
-                showToast('Data refreshed successfully!', 'success');
+                updateStatus('Data loaded successfully!');
+                showToast('Data loaded successfully!', 'success');
+                
             } catch (error) {
-                console.error('Error refreshing data:', error);
-                updateStatus('Error loading data', false);
-                showToast('Error loading data. Check console.', 'error');
+                console.error('Error loading data:', error);
+                updateStatus('Error loading data');
+                showToast('Error loading data. Make sure the spreadsheet is public!', 'error');
             } finally {
-                refreshBtn.disabled = false;
-                refreshBtn.textContent = '🔄 Refresh Data';
+                loadBtn.disabled = false;
+                loadBtn.textContent = '🔄 Load Data';
             }
         }
 
+        function parseSheetData(rows) {
+            const data = [];
+            
+            // Skip header row (first row)
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row.c || !row.c[0]) continue;
+                
+                const symbol = row.c[0]?.v || '';
+                if (!symbol) continue;
+                
+                const bias = row.c[1]?.v || 'Neutral';
+                
+                // Get all score columns (starting from column 2)
+                const scores = [];
+                for (let j = 2; j < row.c.length; j++) {
+                    const value = row.c[j]?.v;
+                    scores.push(value !== null && value !== undefined ? parseInt(value) : 0);
+                }
+                
+                // Calculate total score
+                const totalScore = scores.reduce((a, b) => a + b, 0);
+                
+                data.push({
+                    symbol: symbol,
+                    bias: bias,
+                    score: totalScore,
+                    data: scores
+                });
+            }
+            
+            return data;
+        }
+
         function getBiasClass(bias) {
-            if (bias === "Very Bullish") return "bias-very-bullish";
-            if (bias === "Bullish") return "bias-bullish";
-            if (bias === "Bearish") return "bias-bearish";
-            if (bias === "Very Bearish") return "bias-very-bearish";
-            return "";
+            const biasLower = bias.toLowerCase();
+            if (biasLower.includes('very') && biasLower.includes('bullish')) return 'bias-very-bullish';
+            if (biasLower.includes('bullish')) return 'bias-bullish';
+            if (biasLower.includes('very') && biasLower.includes('bearish')) return 'bias-very-bearish';
+            if (biasLower.includes('bearish')) return 'bias-bearish';
+            return '';
+        }
+
+        function getWeightedScoreClass(score) {
+            if (score >= 80) return 'score-extreme-bullish';
+            if (score >= 60) return 'score-very-bullish';
+            if (score >= 40) return 'score-bullish';
+            if (score >= 20) return 'score-mod-bullish';
+            if (score >= 10) return 'score-slight-bullish';
+            if (score >= -9) return 'score-neutral';
+            if (score >= -19) return 'score-slight-bearish';
+            if (score >= -39) return 'score-mod-bearish';
+            if (score >= -59) return 'score-bearish';
+            if (score >= -79) return 'score-very-bearish';
+            return 'score-extreme-bearish';
+        }
+
+        function getBiasEmoji(score) {
+            if (score >= 80) return '🔥';
+            if (score >= 60) return '💪';
+            if (score >= 40) return '📈';
+            if (score >= 20) return '🟢';
+            if (score >= 10) return '🟡';
+            if (score >= -9) return '⚪';
+            if (score >= -19) return '🟡';
+            if (score >= -39) return '🔴';
+            if (score >= -59) return '📉';
+            if (score >= -79) return '💔';
+            return '☠️';
         }
 
         function renderTable(data = forexData) {
@@ -858,7 +671,7 @@
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="21" style="text-align: center; padding: 40px;">
-                            No data available. Click "Refresh Data" to load.
+                            No data loaded. Click "Load Data" to fetch from Google Sheets.
                         </td>
                     </tr>
                 `;
@@ -870,13 +683,22 @@
             data.forEach(item => {
                 const row = document.createElement('tr');
                 
+                const emoji = getBiasEmoji(item.score);
+                const scoreClass = getWeightedScoreClass(item.score);
+                
                 let html = `
                     <td class="symbol-cell">${item.symbol}</td>
-                    <td class="bias-cell ${getBiasClass(item.bias)}">${item.bias}</td>
-                    <td class="score-cell">${item.score}</td>
+                    <td class="bias-cell ${getBiasClass(item.bias)}">${emoji} ${item.bias}</td>
+                    <td class="score-cell"><span class="weighted-score ${scoreClass}">${item.score > 0 ? '+' : ''}${item.score}</span></td>
                 `;
                 
-                item.data.forEach(score => {
+                // Ensure we have exactly 18 score columns
+                const paddedScores = [...item.data];
+                while (paddedScores.length < 18) {
+                    paddedScores.push(0);
+                }
+                
+                paddedScores.slice(0, 18).forEach(score => {
                     const scoreClass = `score-${score}`;
                     html += `<td class="${scoreClass}"><span class="score-value">${score}</span></td>`;
                 });
@@ -887,46 +709,39 @@
         }
 
         function sortByScore() {
+            if (forexData.length === 0) {
+                showToast('No data to sort!', 'error');
+                return;
+            }
             const sorted = [...forexData].sort((a, b) => b.score - a.score);
             renderTable(sorted);
         }
 
-        function exportToCSV() {
-            if (forexData.length === 0) {
-                showToast('No data to export', 'error');
-                return;
-            }
+        function updateStatus(text) {
+            document.getElementById('statusText').textContent = text;
+        }
 
-            const headers = ['Symbol', 'Bias', 'Score', 'Trend', 'Seasonality', 'COT', 'Crowd', 'GDP', 'mPMI', 'sPMI', 'Retail', 'Consumer', 'CPI', 'PPI', 'PCE', 'Rates', 'NFP', 'Unemployment', 'Claims', 'ADP', 'JOLTS'];
-            
-            let csv = headers.join(',') + '\n';
-            
-            forexData.forEach(item => {
-                const row = [item.symbol, item.bias, item.score, ...item.data];
-                csv += row.join(',') + '\n';
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleString('ro-RO', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
             });
-            
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `forex_scorecard_${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
-            
-            showToast('CSV exported successfully!', 'success');
+            document.getElementById('updateTime').textContent = timeString;
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast show ${type}`;
+            setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
         // Initialize
-        loadApiKeys();
-        renderTable();
-
-        // Auto-refresh every 30 minutes (if keys are configured)
-        setInterval(() => {
-            if (apiKeys.alphaVantage && forexData.length > 0) {
-                console.log('Auto-refreshing data...');
-                refreshAllData();
-            }
-        }, 30 * 60 * 1000);
+        loadSavedConfig();
     </script>
 </body>
 </html>
