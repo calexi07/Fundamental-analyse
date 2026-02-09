@@ -100,7 +100,17 @@
             width: 10px;
             height: 10px;
             border-radius: 50%;
+            background: #4b5563;
+            transition: background 0.3s;
+        }
+
+        .status-dot.active {
             background: #10b981;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+
+        .status-dot.error {
+            background: #ef4444;
         }
 
         .config-section {
@@ -114,22 +124,27 @@
             color: #cbd5e0;
         }
 
-        .input-wrapper {
+        .api-input-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
             margin-bottom: 15px;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            min-width: 300px;
         }
 
         .input-wrapper label {
             display: block;
-            font-size: 12px;
-            color: #a0aec0;
             margin-bottom: 5px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-size: 13px;
+            color: #9ca3af;
         }
 
         .input-wrapper input {
             width: 100%;
-            max-width: 800px;
             padding: 10px;
             background: #1a1d29;
             border: 1px solid #3a3f5c;
@@ -144,59 +159,59 @@
         }
 
         .help-text {
+            margin-top: 5px;
             font-size: 12px;
             color: #718096;
-            margin-top: 5px;
         }
 
         .table-wrapper {
             overflow-x: auto;
-            padding: 0;
+            padding: 20px 30px;
         }
 
         table {
             width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
+            border-collapse: separate;
+            border-spacing: 0;
         }
 
-        thead {
+        th {
+            background: #2d3143;
+            color: #cbd5e0;
+            font-weight: 600;
+            text-align: center;
+            padding: 12px 8px;
+            font-size: 12px;
+            border-bottom: 2px solid #3a3f5c;
             position: sticky;
             top: 0;
             z-index: 100;
         }
 
-        th {
+        th.first-col {
+            position: sticky;
+            z-index: 101;
             background: #2d3143;
-            color: #a0aec0;
-            padding: 12px 8px;
-            text-align: center;
-            font-weight: 600;
-            border: 1px solid #3a3f5c;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
         th.category-main {
             background: #343849;
-            font-size: 13px;
-            font-weight: 700;
-            color: #cbd5e0;
-            border-bottom: 2px solid #4a5568;
-        }
-
-        th.first-col {
-            text-align: left;
-            padding-left: 20px;
-            min-width: 120px;
-            background: #2d3143;
+            font-size: 11px;
+            padding: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-left: 1px solid #3a3f5c;
         }
 
         td {
             padding: 10px 8px;
             text-align: center;
-            border: 1px solid #3a3f5c;
+            border-bottom: 1px solid #2d3143;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+
+        tbody tr {
             background: #24273a;
         }
 
@@ -349,21 +364,17 @@
             animation: slideIn 0.3s ease;
         }
 
-        .toast.show {
-            display: block;
+        .toast.success {
+            border-left: 4px solid #10b981;
         }
 
         .toast.error {
-            background: #ef4444;
-        }
-
-        .toast.success {
-            background: #10b981;
+            border-left: 4px solid #ef4444;
         }
 
         @keyframes slideIn {
             from {
-                transform: translateX(100%);
+                transform: translateX(400px);
                 opacity: 0;
             }
             to {
@@ -372,30 +383,27 @@
             }
         }
 
-        .instructions {
-            background: #343849;
-            padding: 20px 30px;
-            border-bottom: 1px solid #3a3f5c;
-        }
+        @media (max-width: 768px) {
+            .container {
+                border-radius: 0;
+            }
 
-        .instructions h3 {
-            color: #cbd5e0;
-            margin-bottom: 10px;
-        }
+            body {
+                padding: 0;
+            }
 
-        .instructions ol {
-            margin-left: 20px;
-            line-height: 1.8;
-            color: #a0aec0;
-        }
+            .header h1 {
+                font-size: 1.4em;
+            }
 
-        .instructions a {
-            color: #3b82f6;
-            text-decoration: none;
-        }
+            .table-wrapper {
+                padding: 10px;
+            }
 
-        .instructions a:hover {
-            text-decoration: underline;
+            th, td {
+                padding: 8px 4px;
+                font-size: 11px;
+            }
         }
     </style>
 </head>
@@ -443,13 +451,14 @@
                         <th class="first-col" rowspan="2">Score</th>
                         <th class="category-main" colspan="2">Technical</th>
                         <th class="category-main" colspan="2">Sentiment</th>
-                        <th class="category-main" colspan="5">Economic Growth & Consumer</th>
-                        <th class="category-main" colspan="4">Inflation</th>
-                        <th class="category-main" colspan="5">Jobs Market</th>
+                        <th class="category-main" colspan="5">Economic Growth</th>
+                        <th class="category-main" colspan="3">Inflation</th>
+                        <th class="category-main" colspan="1">Policy</th>
+                        <th class="category-main" colspan="3">Special</th>
                     </tr>
                     <tr>
                         <th>Trend</th>
-                        <th>Seasonality</th>
+                        <th>Season</th>
                         <th>COT</th>
                         <th>Crowd</th>
                         <th>GDP</th>
@@ -459,18 +468,16 @@
                         <th>Consumer</th>
                         <th>CPI</th>
                         <th>PPI</th>
-                        <th>PCE</th>
-                        <th>Rates</th>
-                        <th>NFP</th>
                         <th>Unemp.</th>
-                        <th>Claims</th>
-                        <th>ADP</th>
-                        <th>JOLTS</th>
+                        <th>Rates</th>
+                        <th title="Employment/NFP">Employ</th>
+                        <th title="Iron Ore/Oil/Dairy/Tankan/ESI/Wage/KOF">Spec1</th>
+                        <th title="Industrial Prod/Claims Diff">Spec2</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
                     <tr>
-                        <td colspan="21" style="text-align: center; padding: 40px;">
+                        <td colspan="19" style="text-align: center; padding: 40px;">
                             ⟳ Loading data automatically...
                         </td>
                     </tr>
@@ -500,135 +507,108 @@
                 <span>Strong Bearish</span>
             </div>
         </div>
+
+        <div class="update-info">
+            <p style="margin-bottom: 10px;"><strong>Legend:</strong></p>
+            <p style="font-size: 12px; line-height: 1.6;">
+                <strong>Spec1:</strong> Iron Ore (AUD), Oil (CAD), Dairy (NZD), Tankan (JPY), ESI (EUR), Wage Growth (GBP), KOF (CHF)<br>
+                <strong>Spec2:</strong> Industrial Production (EUR), Claims Differential (GBP vs USD)
+            </p>
+        </div>
     </div>
 
     <div class="toast" id="toast"></div>
 
     <script>
-        let forexData = [];
-        
-        // Hardcoded Spreadsheet ID - your permanent spreadsheet
         const SPREADSHEET_ID = '1hKq-Slzo-FMO9OXMvLJx-Ex4p0fU_OnJzRx1biNanw0';
 
-        // Auto-load on page load
-        window.addEventListener('DOMContentLoaded', function() {
-            // Set the spreadsheet ID in the input field (hidden now)
-            document.getElementById('spreadsheetId').value = SPREADSHEET_ID;
-            
-            // Auto-load data after 500ms delay
-            setTimeout(function() {
-                loadData();
-            }, 500);
-        });
+        let currentData = [];
 
-        // Load saved spreadsheet ID
-        function loadSavedConfig() {
-            const savedId = localStorage.getItem('spreadsheetId');
-            if (savedId) {
-                document.getElementById('spreadsheetId').value = savedId;
-            }
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
         }
 
-        function toggleInstructions() {
-            const instructions = document.getElementById('instructions');
-            instructions.style.display = instructions.style.display === 'none' ? 'block' : 'none';
-        }
-
-        function saveAndLoad() {
-            const spreadsheetId = document.getElementById('spreadsheetId').value.trim();
+        function updateStatus(message, isActive = false, isError = false) {
+            const statusText = document.getElementById('statusText');
+            const statusDot = document.querySelector('.status-dot');
             
-            if (!spreadsheetId) {
-                showToast('Please enter a Spreadsheet ID!', 'error');
-                return;
-            }
+            statusText.textContent = message;
             
-            localStorage.setItem('spreadsheetId', spreadsheetId);
-            showToast('Configuration saved!', 'success');
-            loadData();
+            statusDot.classList.remove('active', 'error');
+            if (isActive) statusDot.classList.add('active');
+            if (isError) statusDot.classList.add('error');
         }
 
         async function loadData() {
-            // Use hardcoded spreadsheet ID
-            const spreadsheetId = SPREADSHEET_ID;
-
             const loadBtn = document.getElementById('loadBtn');
-            loadBtn.disabled = true;
-            loadBtn.textContent = '⟳ Loading...';
+            const spreadsheetId = SPREADSHEET_ID;
             
-            updateStatus('Loading data from Google Sheets...');
-
+            loadBtn.disabled = true;
+            updateStatus('Loading data from Google Sheets...', true);
+            
             try {
-                // Google Sheets public API URL (no authentication needed for public sheets)
-                const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json`;
-                
-                const response = await fetch(url);
+                const response = await fetch(`https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json&sheet=SCORECARD`);
                 const text = await response.text();
-                
-                // Parse Google Sheets JSON response (it's wrapped in a function call)
                 const json = JSON.parse(text.substr(47).slice(0, -2));
                 
-                if (!json.table || !json.table.rows) {
-                    throw new Error('Invalid spreadsheet format');
-                }
+                currentData = parseSheetData(json);
+                displayData(currentData);
                 
-                forexData = parseSheetData(json.table.rows);
-                renderTable();
-                updateTime();
-                updateStatus('Data loaded successfully!');
+                const now = new Date();
+                document.getElementById('updateTime').textContent = now.toLocaleString('ro-RO');
+                
+                updateStatus(`Loaded ${currentData.length} currency pairs`, true);
                 showToast('Data loaded successfully!', 'success');
-                
             } catch (error) {
-                console.error('Error loading data:', error);
-                updateStatus('Error loading data');
-                showToast('Error loading data. Make sure the spreadsheet is public!', 'error');
+                console.error('Error:', error);
+                updateStatus('Error loading data', false, true);
+                showToast('Error loading data. Please check your Spreadsheet ID.', 'error');
             } finally {
                 loadBtn.disabled = false;
-                loadBtn.textContent = '🔄 Refresh Data';
             }
         }
 
-        function parseSheetData(rows) {
+        function parseSheetData(json) {
+            const rows = json.table.rows;
             const data = [];
             
-            // Process all rows - Google Sheets API includes header as row 0
             for (let i = 0; i < rows.length; i++) {
-                const row = rows[i];
-                if (!row.c || !row.c[0]) continue;
+                const row = rows[i].c;
+                if (!row) continue;
                 
-                const symbol = row.c[0]?.v || '';
-                if (!symbol) continue;
-                
-                // Skip header row by checking if symbol looks like a header
-                if (symbol.toLowerCase() === 'symbol' || symbol.toLowerCase().includes('header')) continue;
-                
-                const bias = row.c[1]?.v || 'Neutral';
-                const weightedScore = row.c[2]?.v || 0;
-                
-                // Get individual indicator scores (starting from column 3 - index 3)
-                const scores = [];
-                for (let j = 3; j < row.c.length && j < 21; j++) { // Columns D-U (3-20)
-                    const value = row.c[j]?.v;
-                    scores.push(value !== null && value !== undefined ? parseFloat(value) : 0);
-                }
+                const symbol = row[0]?.v;
+                if (!symbol || symbol.toLowerCase() === 'symbol') continue;
                 
                 data.push({
                     symbol: symbol,
-                    bias: bias,
-                    score: parseFloat(weightedScore) || 0,
-                    data: scores
+                    bias: row[1]?.v || '',
+                    score: parseFloat(row[2]?.v) || 0,
+                    trend: parseFloat(row[3]?.v) || 0,
+                    seasonality: parseFloat(row[4]?.v) || 0,
+                    cot: parseFloat(row[5]?.v) || 0,
+                    crowd: parseFloat(row[6]?.v) || 0,
+                    gdp: parseFloat(row[7]?.v) || 0,
+                    cpi: parseFloat(row[8]?.v) || 0,
+                    ppi: parseFloat(row[9]?.v) || 0,
+                    unemployment: parseFloat(row[10]?.v) || 0,
+                    rates: parseFloat(row[11]?.v) || 0,
+                    mpmi: parseFloat(row[12]?.v) || 0,
+                    spmi: parseFloat(row[13]?.v) || 0,
+                    retail: parseFloat(row[14]?.v) || 0,
+                    consumer: parseFloat(row[15]?.v) || 0,
+                    employment: parseFloat(row[16]?.v) || 0,
+                    special1: parseFloat(row[17]?.v) || 0,
+                    special2: parseFloat(row[18]?.v) || 0
                 });
             }
             
             return data;
-        }
-
-        function getBiasClass(bias) {
-            const biasLower = bias.toLowerCase();
-            if (biasLower.includes('very') && biasLower.includes('bullish')) return 'bias-very-bullish';
-            if (biasLower.includes('bullish')) return 'bias-bullish';
-            if (biasLower.includes('very') && biasLower.includes('bearish')) return 'bias-very-bearish';
-            if (biasLower.includes('bearish')) return 'bias-bearish';
-            return '';
         }
 
         function getWeightedScoreClass(score) {
@@ -645,98 +625,65 @@
             return 'score-extreme-bearish';
         }
 
-        function getBiasEmoji(score) {
-            if (score >= 80) return '🔥';
-            if (score >= 60) return '💪';
-            if (score >= 40) return '📈';
-            if (score >= 20) return '🟢';
-            if (score >= 10) return '🟡';
-            if (score >= -9) return '⚪';
-            if (score >= -19) return '🟡';
-            if (score >= -39) return '🔴';
-            if (score >= -59) return '📉';
-            if (score >= -79) return '💔';
-            return '☠️';
+        function getScoreClass(value) {
+            if (value === 2) return 'score-2';
+            if (value === 1) return 'score-1';
+            if (value === 0) return 'score-0';
+            if (value === -1) return 'score--1';
+            if (value === -2) return 'score--2';
+            return 'score-0';
         }
 
-        function renderTable(data = forexData) {
+        function displayData(data) {
             const tbody = document.getElementById('tableBody');
-            
-            if (data.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="21" style="text-align: center; padding: 40px;">
-                            No data loaded. Click "Load Data" to fetch from Google Sheets.
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
             tbody.innerHTML = '';
-
+            
             data.forEach(item => {
                 const row = document.createElement('tr');
                 
-                const emoji = getBiasEmoji(item.score);
                 const scoreClass = getWeightedScoreClass(item.score);
+                const scoreSign = item.score > 0 ? '+' : '';
                 
-                let html = `
+                row.innerHTML = `
                     <td class="symbol-cell">${item.symbol}</td>
-                    <td class="bias-cell ${getBiasClass(item.bias)}">${emoji} ${item.bias}</td>
-                    <td class="score-cell"><span class="weighted-score ${scoreClass}">${item.score > 0 ? '+' : ''}${item.score}</span></td>
+                    <td class="bias-cell">${item.bias}</td>
+                    <td class="score-cell">
+                        <span class="weighted-score ${scoreClass}">${scoreSign}${item.score.toFixed(1)}</span>
+                    </td>
+                    <td><span class="score-value ${getScoreClass(item.trend)}">${item.trend > 0 ? '+' : ''}${item.trend}</span></td>
+                    <td><span class="score-value ${getScoreClass(item.seasonality)}">${item.seasonality > 0 ? '+' : ''}${item.seasonality}</span></td>
+                    <td><span class="score-value ${getScoreClass(item.cot)}">${item.cot > 0 ? '+' : ''}${item.cot}</span></td>
+                    <td><span class="score-value ${getScoreClass(item.crowd)}">${item.crowd > 0 ? '+' : ''}${item.crowd}</span></td>
+                    <td><span class="score-value ${getScoreClass(item.gdp)}">${item.gdp > 0 ? '+' : ''}${item.gdp}</span></td>
+                    <td><span class="score-value ${getScoreClass(item.mpmi)}">${item.mpmi > 0 ? '+' : ''}${item.mpmi}</span></td>
+                    <td><span class="score-value ${getScoreClass(item.spmi)}">${item.spmi > 0 ? '+' : ''}${item.spmi}</span></td>
+                    <td><span class="score-value ${getScoreClass(item.retail)}">${item.retail > 0 ? '+' : ''}${item.retail}</span></td>
+                    <td><span class="score-value ${getScoreClass(item.consumer)}">${item.consumer > 0 ? '+' : ''}${item.consumer}</span></td>
+                    <td><span class="score-value ${getScoreClass(item.cpi)}">${item.cpi > 0 ? '+' : ''}${item.cpi}</span></td>
+                    <td><span class="score-value ${getScoreClass(item.ppi)}">${item.ppi > 0 ? '+' : ''}${item.ppi}</span></td>
+                    <td><span class="score-value ${getScoreClass(item.unemployment)}">${item.unemployment > 0 ? '+' : ''}${item.unemployment}</span></td>
+                    <td><span class="score-value ${getScoreClass(item.rates)}">${item.rates > 0 ? '+' : ''}${item.rates}</span></td>
+                    <td><span class="score-value ${getScoreClass(item.employment)}">${item.employment > 0 ? '+' : ''}${item.employment}</span></td>
+                    <td><span class="score-value ${getScoreClass(item.special1)}">${item.special1 > 0 ? '+' : ''}${item.special1 !== 0 ? item.special1 : '-'}</span></td>
+                    <td><span class="score-value ${getScoreClass(item.special2)}">${item.special2 > 0 ? '+' : ''}${item.special2 !== 0 ? item.special2 : '-'}</span></td>
                 `;
                 
-                // Ensure we have exactly 18 score columns
-                const paddedScores = [...item.data];
-                while (paddedScores.length < 18) {
-                    paddedScores.push(0);
-                }
-                
-                paddedScores.slice(0, 18).forEach(score => {
-                    const scoreClass = `score-${score}`;
-                    html += `<td class="${scoreClass}"><span class="score-value">${score}</span></td>`;
-                });
-                
-                row.innerHTML = html;
                 tbody.appendChild(row);
             });
         }
 
         function sortByScore() {
-            if (forexData.length === 0) {
-                showToast('No data to sort!', 'error');
-                return;
-            }
-            const sorted = [...forexData].sort((a, b) => b.score - a.score);
-            renderTable(sorted);
+            currentData.sort((a, b) => b.score - a.score);
+            displayData(currentData);
+            showToast('Sorted by score (highest to lowest)', 'success');
         }
 
-        function updateStatus(text) {
-            document.getElementById('statusText').textContent = text;
-        }
-
-        function updateTime() {
-            const now = new Date();
-            const timeString = now.toLocaleString('ro-RO', { 
-                year: 'numeric', 
-                month: 'short', 
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-            document.getElementById('updateTime').textContent = timeString;
-        }
-
-        function showToast(message, type = 'info') {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.className = `toast show ${type}`;
-            setTimeout(() => toast.classList.remove('show'), 3000);
-        }
-
-        // Initialize
-        loadSavedConfig();
+        // Auto-load on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                loadData();
+            }, 500);
+        });
     </script>
 </body>
 </html>
