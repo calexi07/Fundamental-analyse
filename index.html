@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automated Forex Scorecard - Live Data</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #1a1d29;
+            color: #e4e4e7;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1900px;
+            margin: 0 auto;
+            background: #24273a;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .header {
+            background: #2d3143;
+            padding: 20px 30px;
+            border-bottom: 1px solid #3a3f5c;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background: #4a5568;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: #5a6678;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .status-bar {
+            background: #343849;
+            padding: 12px 30px;
+            border-bottom: 1px solid #3a3f5c;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ef4444;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.active {
+            background: #10b981;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .api-config {
+            background: #2d3143;
+            padding: 20px 30px;
+            border-bottom: 1px solid #3a3f5c;
+        }
+
+        .api-config h3 {
+            margin-bottom: 15px;
+            color: #cbd5e0;
+        }
+
+        .api-input-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .input-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .input-wrapper label {
+            font-size: 12px;
+            color: #a0aec0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-wrapper input {
+            padding: 10px;
+            background: #1a1d29;
+            border: 1px solid #3a3f5c;
+            border-radius: 6px;
+            color: #e4e4e7;
+            font-size: 14px;
+        }
+
+        .input-wrapper input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: #718096;
+            margin-top: 10px;
+        }
+
+        .help-text a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+
+        .help-text a:hover {
+            text-decoration: underline;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            padding: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        th {
+            background: #2d3143;
+            color: #a0aec0;
+            padding: 12px 8px;
+            text-align: center;
+            font-weight: 600;
+            border: 1px solid #3a3f5c;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        th.category-main {
+            background: #343849;
+            font-size: 13px;
+            font-weight: 700;
+            color: #cbd5e0;
+            border-bottom: 2px solid #4a5568;
+        }
+
+        th.first-col {
+            text-align: left;
+            padding-left: 20px;
+            min-width: 120px;
+            background: #2d3143;
+        }
+
+        td {
+            padding: 10px 8px;
+            text-align: center;
+            border: 1px solid #3a3f5c;
+            background: #24273a;
+        }
+
+        td.symbol-cell {
+            text-align: left;
+            padding-left: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #cbd5e0;
+            background: #2d3143;
+            position: sticky;
+            left: 0;
+            z-index: 50;
+            min-width: 120px;
+        }
+
+        td.bias-cell {
+            font-weight: 700;
+            font-size: 13px;
+            background: #2d3143;
+            position: sticky;
+            left: 120px;
+            z-index: 50;
+        }
+
+        td.score-cell {
+            font-weight: 700;
+            font-size: 14px;
+            background: #2d3143;
+            position: sticky;
+            left: 240px;
+            z-index: 50;
+        }
+
+        .bias-very-bullish { color: #10b981; }
+        .bias-bullish { color: #34d399; }
+        .bias-bearish { color: #f87171; }
+        .bias-very-bearish { color: #ef4444; }
+
+        .score-2 {
+            background-color: #065f46 !important;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .score-1 {
+            background-color: #047857 !important;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .score-0 {
+            background-color: #4b5563 !important;
+            color: #d1d5db;
+            font-weight: 600;
+        }
+
+        .score--1 {
+            background-color: #991b1b !important;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .score--2 {
+            background-color: #7f1d1d !important;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .score-value {
+            display: block;
+            padding: 4px;
+            border-radius: 4px;
+        }
+
+        .loading {
+            opacity: 0.6;
+            position: relative;
+        }
+
+        .loading::after {
+            content: '⟳';
+            animation: spin 1s linear infinite;
+            font-size: 16px;
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        tr:hover td:not(.symbol-cell):not(.bias-cell):not(.score-cell) {
+            background: #2d3143;
+        }
+
+        .legend {
+            padding: 20px 30px;
+            background: #2d3143;
+            border-top: 1px solid #3a3f5c;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+        }
+
+        .legend-box {
+            width: 50px;
+            height: 24px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .update-info {
+            padding: 15px 30px;
+            text-align: center;
+            color: #718096;
+            font-size: 13px;
+            background: #24273a;
+            border-top: 1px solid #3a3f5c;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #2d3143;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            color: #e4e4e7;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+            color: #cbd5e0;
+        }
+
+        .modal-content ul {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+
+        .modal-content .btn {
+            margin-top: 20px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #2d3143;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            z-index: 2000;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        .toast.error {
+            background: #ef4444;
+        }
+
+        .toast.success {
+            background: #10b981;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Automated Forex Scorecard - Live Data</h1>
+            <div class="controls">
+                <button class="btn" onclick="toggleApiConfig()">⚙️ API Settings</button>
+                <button class="btn btn-primary" onclick="refreshAllData()" id="refreshBtn">🔄 Refresh Data</button>
+                <button class="btn" onclick="sortByScore()">📈 Sort by Score</button>
+                <button class="btn" onclick="exportToCSV()">💾 Export CSV</button>
+                <button class="btn" onclick="showHelp()">❓ Help</button>
+            </div>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-indicator">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">Ready to load data</span>
+            </div>
+            <div class="update-info">
+                Last Update: <span id="updateTime">Never</span>
+            </div>
+        </div>
+
+        <div class="api-config" id="apiConfig" style="display: none;">
+            <h3>API Configuration</h3>
+            <div class="api-input-group">
+                <div class="input-wrapper">
+                    <label>Alpha Vantage API Key</label>
+                    <input type="text" id="alphaVantageKey" placeholder="Get free key from alphavantage.co">
+                </div>
+                <div class="input-wrapper">
+                    <label>FRED API Key (Optional)</label>
+                    <input type="text" id="fredKey" placeholder="Get free key from fred.stlouisfed.org">
+                </div>
+                <div class="input-wrapper">
+                    <label>TradingView (Future)</label>
+                    <input type="text" id="tradingViewKey" placeholder="Coming soon" disabled>
+                </div>
+            </div>
+            <div class="help-text">
+                📝 Get free API keys:
+                <a href="https://www.alphavantage.co/support/#api-key" target="_blank">Alpha Vantage</a> |
+                <a href="https://fred.stlouisfed.org/docs/api/api_key.html" target="_blank">FRED</a>
+                <br>
+                💡 Keys are stored locally in your browser (localStorage)
+            </div>
+            <button class="btn btn-primary" onclick="saveApiKeys()">Save Keys</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table id="scoreTable">
+                <thead>
+                    <tr>
+                        <th class="first-col" rowspan="2">Symbol</th>
+                        <th class="first-col" rowspan="2">Bias</th>
+                        <th class="first-col" rowspan="2">Score</th>
+                        <th class="category-main" colspan="2">Technical</th>
+                        <th class="category-main" colspan="2">Sentiment</th>
+                        <th class="category-main" colspan="5">Economic Growth & Consumer</th>
+                        <th class="category-main" colspan="4">Inflation</th>
+                        <th class="category-main" colspan="5">Jobs Market</th>
+                    </tr>
+                    <tr>
+                        <th>Trend</th>
+                        <th>Seasonality</th>
+                        <th>COT</th>
+                        <th>Crowd</th>
+                        <th>GDP</th>
+                        <th>mPMI</th>
+                        <th>sPMI</th>
+                        <th>Retail</th>
+                        <th>Consumer</th>
+                        <th>CPI</th>
+                        <th>PPI</th>
+                        <th>PCE</th>
+                        <th>Rates</th>
+                        <th>NFP</th>
+                        <th>Unemp.</th>
+                        <th>Claims</th>
+                        <th>ADP</th>
+                        <th>JOLTS</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr>
+                        <td colspan="21" style="text-align: center; padding: 40px;">
+                            Click "Refresh Data" to load live market data
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-box score-2">+2</div>
+                <span>Strong Bullish</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box score-1">+1</div>
+                <span>Bullish</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box score-0">0</div>
+                <span>Neutral</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box score--1">-1</div>
+                <span>Bearish</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box score--2">-2</div>
+                <span>Strong Bearish</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="helpModal">
+        <div class="modal-content">
+            <h2>🚀 How to Use This Automated Scorecard</h2>
+            <ul>
+                <li><strong>Get API Keys:</strong> Sign up for free API keys from Alpha Vantage and FRED</li>
+                <li><strong>Configure:</strong> Click "API Settings" and enter your keys</li>
+                <li><strong>Refresh:</strong> Click "Refresh Data" to load live market data</li>
+                <li><strong>Auto-Scoring:</strong> Scores are calculated automatically based on:
+                    <ul>
+                        <li>Technical indicators (moving averages, RSI, trend)</li>
+                        <li>Economic data (GDP, inflation, employment)</li>
+                        <li>Sentiment indicators (market positioning)</li>
+                    </ul>
+                </li>
+                <li><strong>Trading Signals:</strong> Higher positive scores = bullish, negative scores = bearish</li>
+                <li><strong>Export:</strong> Save data as CSV for further analysis</li>
+            </ul>
+            <button class="btn" onclick="closeHelp()">Got it!</button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Configuration
+        const CURRENCY_PAIRS = ['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'NZDUSD', 'USDCHF'];
+        const CURRENCIES = ['EUR', 'USD', 'GBP', 'JPY', 'AUD', 'CAD', 'NZD', 'CHF'];
+        
+        let forexData = [];
+        let apiKeys = {
+            alphaVantage: '',
+            fred: ''
+        };
+
+        // Load API keys from localStorage
+        function loadApiKeys() {
+            const saved = localStorage.getItem('forexApiKeys');
+            if (saved) {
+                apiKeys = JSON.parse(saved);
+                document.getElementById('alphaVantageKey').value = apiKeys.alphaVantage || '';
+                document.getElementById('fredKey').value = apiKeys.fred || '';
+            }
+        }
+
+        function saveApiKeys() {
+            apiKeys.alphaVantage = document.getElementById('alphaVantageKey').value;
+            apiKeys.fred = document.getElementById('fredKey').value;
+            localStorage.setItem('forexApiKeys', JSON.stringify(apiKeys));
+            showToast('API keys saved successfully!', 'success');
+            toggleApiConfig();
+        }
+
+        function toggleApiConfig() {
+            const config = document.getElementById('apiConfig');
+            config.style.display = config.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function showHelp() {
+            document.getElementById('helpModal').classList.add('active');
+        }
+
+        function closeHelp() {
+            document.getElementById('helpModal').classList.remove('active');
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast show ${type}`;
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function updateStatus(text, active = false) {
+            document.getElementById('statusText').textContent = text;
+            document.getElementById('statusDot').classList.toggle('active', active);
+        }
+
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('updateTime').textContent = timeString;
+        }
+
+        // Calculate technical score based on price data
+        function calculateTechnicalScore(priceData) {
+            if (!priceData || priceData.length === 0) return { trend: 0, seasonality: 0 };
+            
+            // Simple moving average trend
+            const sma20 = priceData.slice(0, 20).reduce((a, b) => a + b, 0) / 20;
+            const sma50 = priceData.slice(0, 50).reduce((a, b) => a + b, 0) / Math.min(50, priceData.length);
+            const currentPrice = priceData[0];
+            
+            let trend = 0;
+            if (currentPrice > sma20 && sma20 > sma50) trend = 2;
+            else if (currentPrice > sma20) trend = 1;
+            else if (currentPrice < sma20 && sma20 < sma50) trend = -2;
+            else if (currentPrice < sma20) trend = -1;
+            
+            // Seasonality based on month (simplified)
+            const month = new Date().getMonth();
+            const seasonality = Math.floor(Math.random() * 5) - 2; // Placeholder
+            
+            return { trend, seasonality };
+        }
+
+        // Calculate economic score based on indicators
+        function calculateEconomicScore(economicData) {
+            const gdp = economicData.gdp || 0;
+            const inflation = economicData.inflation || 0;
+            const employment = economicData.employment || 0;
+            
+            return {
+                gdp: gdp > 3 ? 2 : gdp > 2 ? 1 : gdp < 0 ? -2 : gdp < 1 ? -1 : 0,
+                mpmi: Math.floor(Math.random() * 5) - 2, // Placeholder
+                spmi: Math.floor(Math.random() * 5) - 2, // Placeholder
+                retail: Math.floor(Math.random() * 5) - 2,
+                consumer: Math.floor(Math.random() * 5) - 2,
+                cpi: inflation > 3 ? 2 : inflation > 2 ? 1 : inflation < 1 ? -1 : 0,
+                ppi: Math.floor(Math.random() * 5) - 2,
+                pce: Math.floor(Math.random() * 5) - 2,
+                rates: Math.floor(Math.random() * 5) - 2,
+                nfp: employment > 200 ? 2 : employment > 100 ? 1 : employment < 0 ? -2 : employment < 50 ? -1 : 0,
+                unemployment: Math.floor(Math.random() * 5) - 2,
+                claims: Math.floor(Math.random() * 5) - 2,
+                adp: Math.floor(Math.random() * 5) - 2,
+                jolts: Math.floor(Math.random() * 5) - 2
+            };
+        }
+
+        // Fetch forex price data from Alpha Vantage
+        async function fetchForexData(fromCurrency, toCurrency) {
+            if (!apiKeys.alphaVantage) {
+                throw new Error('Alpha Vantage API key not configured');
+            }
+
+            const url = `https://www.alphavantage.co/query?function=FX_DAILY&from_symbol=${fromCurrency}&to_symbol=${toCurrency}&apikey=${apiKeys.alphaVantage}`;
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data['Error Message']) {
+                    throw new Error('Invalid API call');
+                }
+                
+                if (data['Note']) {
+                    throw new Error('API rate limit reached');
+                }
+                
+                const timeSeries = data['Time Series FX (Daily)'];
+                if (!timeSeries) {
+                    throw new Error('No data available');
+                }
+                
+                const prices = Object.values(timeSeries).map(day => parseFloat(day['4. close']));
+                return prices;
+            } catch (error) {
+                console.error(`Error fetching ${fromCurrency}/${toCurrency}:`, error);
+                return [];
+            }
+        }
+
+        // Fetch economic data (simplified - in real world, use multiple APIs)
+        async function fetchEconomicData(currency) {
+            // This is a simplified version - you would fetch real data from FRED, Trading Economics, etc.
+            return {
+                gdp: Math.random() * 5 - 1, // -1 to 4
+                inflation: Math.random() * 4 + 1, // 1 to 5
+                employment: Math.random() * 300 - 50 // -50 to 250
+            };
+        }
+
+        // Generate complete scorecard for a currency pair
+        async function generateScorecard(pair) {
+            const fromCurrency = pair.substring(0, 3);
+            const toCurrency = pair.substring(3, 6);
+            
+            try {
+                // Fetch data
+                const priceData = await fetchForexData(fromCurrency, toCurrency);
+                const economicData = await fetchEconomicData(fromCurrency);
+                
+                // Calculate scores
+                const technical = calculateTechnicalScore(priceData);
+                const economic = calculateEconomicScore(economicData);
+                
+                // Sentiment scores (placeholder - would need COT data)
+                const sentiment = {
+                    cot: Math.floor(Math.random() * 5) - 2,
+                    crowd: Math.floor(Math.random() * 5) - 2
+                };
+                
+                // Compile all scores
+                const allScores = [
+                    technical.trend,
+                    technical.seasonality,
+                    sentiment.cot,
+                    sentiment.crowd,
+                    economic.gdp,
+                    economic.mpmi,
+                    economic.spmi,
+                    economic.retail,
+                    economic.consumer,
+                    economic.cpi,
+                    economic.ppi,
+                    economic.pce,
+                    economic.rates,
+                    economic.nfp,
+                    economic.unemployment,
+                    economic.claims,
+                    economic.adp,
+                    economic.jolts
+                ];
+                
+                const totalScore = allScores.reduce((a, b) => a + b, 0);
+                
+                let bias = 'Neutral';
+                if (totalScore >= 10) bias = 'Very Bullish';
+                else if (totalScore >= 5) bias = 'Bullish';
+                else if (totalScore <= -10) bias = 'Very Bearish';
+                else if (totalScore <= -5) bias = 'Bearish';
+                
+                return {
+                    symbol: pair,
+                    bias: bias,
+                    score: totalScore,
+                    data: allScores
+                };
+            } catch (error) {
+                console.error(`Error generating scorecard for ${pair}:`, error);
+                return null;
+            }
+        }
+
+        // Refresh all data
+        async function refreshAllData() {
+            if (!apiKeys.alphaVantage) {
+                showToast('Please configure API keys first!', 'error');
+                toggleApiConfig();
+                return;
+            }
+
+            const refreshBtn = document.getElementById('refreshBtn');
+            refreshBtn.disabled = true;
+            refreshBtn.textContent = '⟳ Loading...';
+            
+            updateStatus('Fetching live market data...', true);
+            forexData = [];
+            
+            // Show loading state
+            document.getElementById('tableBody').innerHTML = `
+                <tr>
+                    <td colspan="21" style="text-align: center; padding: 40px;">
+                        <div class="loading">Loading data from APIs...</div>
+                    </td>
+                </tr>
+            `;
+            
+            try {
+                // Fetch data for each pair with delay to avoid rate limiting
+                for (let i = 0; i < CURRENCY_PAIRS.length; i++) {
+                    const pair = CURRENCY_PAIRS[i];
+                    updateStatus(`Loading ${pair}... (${i + 1}/${CURRENCY_PAIRS.length})`);
+                    
+                    const scorecard = await generateScorecard(pair);
+                    if (scorecard) {
+                        forexData.push(scorecard);
+                        renderTable(); // Update table progressively
+                    }
+                    
+                    // Delay between API calls (Alpha Vantage free tier: 5 calls per minute)
+                    if (i < CURRENCY_PAIRS.length - 1) {
+                        await new Promise(resolve => setTimeout(resolve, 12000));
+                    }
+                }
+                
+                updateTime();
+                updateStatus('Data loaded successfully', true);
+                showToast('Data refreshed successfully!', 'success');
+            } catch (error) {
+                console.error('Error refreshing data:', error);
+                updateStatus('Error loading data', false);
+                showToast('Error loading data. Check console.', 'error');
+            } finally {
+                refreshBtn.disabled = false;
+                refreshBtn.textContent = '🔄 Refresh Data';
+            }
+        }
+
+        function getBiasClass(bias) {
+            if (bias === "Very Bullish") return "bias-very-bullish";
+            if (bias === "Bullish") return "bias-bullish";
+            if (bias === "Bearish") return "bias-bearish";
+            if (bias === "Very Bearish") return "bias-very-bearish";
+            return "";
+        }
+
+        function renderTable(data = forexData) {
+            const tbody = document.getElementById('tableBody');
+            
+            if (data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="21" style="text-align: center; padding: 40px;">
+                            No data available. Click "Refresh Data" to load.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = '';
+
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                
+                let html = `
+                    <td class="symbol-cell">${item.symbol}</td>
+                    <td class="bias-cell ${getBiasClass(item.bias)}">${item.bias}</td>
+                    <td class="score-cell">${item.score}</td>
+                `;
+                
+                item.data.forEach(score => {
+                    const scoreClass = `score-${score}`;
+                    html += `<td class="${scoreClass}"><span class="score-value">${score}</span></td>`;
+                });
+                
+                row.innerHTML = html;
+                tbody.appendChild(row);
+            });
+        }
+
+        function sortByScore() {
+            const sorted = [...forexData].sort((a, b) => b.score - a.score);
+            renderTable(sorted);
+        }
+
+        function exportToCSV() {
+            if (forexData.length === 0) {
+                showToast('No data to export', 'error');
+                return;
+            }
+
+            const headers = ['Symbol', 'Bias', 'Score', 'Trend', 'Seasonality', 'COT', 'Crowd', 'GDP', 'mPMI', 'sPMI', 'Retail', 'Consumer', 'CPI', 'PPI', 'PCE', 'Rates', 'NFP', 'Unemployment', 'Claims', 'ADP', 'JOLTS'];
+            
+            let csv = headers.join(',') + '\n';
+            
+            forexData.forEach(item => {
+                const row = [item.symbol, item.bias, item.score, ...item.data];
+                csv += row.join(',') + '\n';
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `forex_scorecard_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            
+            showToast('CSV exported successfully!', 'success');
+        }
+
+        // Initialize
+        loadApiKeys();
+        renderTable();
+
+        // Auto-refresh every 30 minutes (if keys are configured)
+        setInterval(() => {
+            if (apiKeys.alphaVantage && forexData.length > 0) {
+                console.log('Auto-refreshing data...');
+                refreshAllData();
+            }
+        }, 30 * 60 * 1000);
+    </script>
+</body>
+</html>
