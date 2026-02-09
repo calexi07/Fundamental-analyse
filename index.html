@@ -596,30 +596,31 @@
         function parseSheetData(rows) {
             const data = [];
             
-            // Skip header row (first row)
-            for (let i = 1; i < rows.length; i++) {
+            // Process all rows - Google Sheets API includes header as row 0
+            for (let i = 0; i < rows.length; i++) {
                 const row = rows[i];
                 if (!row.c || !row.c[0]) continue;
                 
                 const symbol = row.c[0]?.v || '';
                 if (!symbol) continue;
                 
+                // Skip header row by checking if symbol looks like a header
+                if (symbol.toLowerCase() === 'symbol' || symbol.toLowerCase().includes('header')) continue;
+                
                 const bias = row.c[1]?.v || 'Neutral';
+                const weightedScore = row.c[2]?.v || 0;
                 
-                // Get all score columns (starting from column 2)
+                // Get individual indicator scores (starting from column 3 - index 3)
                 const scores = [];
-                for (let j = 2; j < row.c.length; j++) {
+                for (let j = 3; j < row.c.length && j < 21; j++) { // Columns D-U (3-20)
                     const value = row.c[j]?.v;
-                    scores.push(value !== null && value !== undefined ? parseInt(value) : 0);
+                    scores.push(value !== null && value !== undefined ? parseFloat(value) : 0);
                 }
-                
-                // Calculate total score
-                const totalScore = scores.reduce((a, b) => a + b, 0);
                 
                 data.push({
                     symbol: symbol,
                     bias: bias,
-                    score: totalScore,
+                    score: parseFloat(weightedScore) || 0,
                     data: scores
                 });
             }
