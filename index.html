@@ -113,57 +113,6 @@
             background: #ef4444;
         }
 
-        .config-section {
-            background: #2d3143;
-            padding: 20px 30px;
-            border-bottom: 1px solid #3a3f5c;
-        }
-
-        .config-section h3 {
-            margin-bottom: 15px;
-            color: #cbd5e0;
-        }
-
-        .api-input-group {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            margin-bottom: 15px;
-        }
-
-        .input-wrapper {
-            flex: 1;
-            min-width: 300px;
-        }
-
-        .input-wrapper label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 13px;
-            color: #9ca3af;
-        }
-
-        .input-wrapper input {
-            width: 100%;
-            padding: 10px;
-            background: #1a1d29;
-            border: 1px solid #3a3f5c;
-            border-radius: 6px;
-            color: #e4e4e7;
-            font-size: 14px;
-        }
-
-        .input-wrapper input:focus {
-            outline: none;
-            border-color: #3b82f6;
-        }
-
-        .help-text {
-            margin-top: 5px;
-            font-size: 12px;
-            color: #718096;
-        }
-
         .table-wrapper {
             overflow-x: auto;
             padding: 20px 30px;
@@ -209,6 +158,7 @@
             border-bottom: 1px solid #2d3143;
             font-size: 13px;
             transition: background 0.2s;
+            position: relative;
         }
 
         tbody tr {
@@ -268,11 +218,6 @@
         .score-very-bearish { background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; }
         .score-extreme-bearish { background: linear-gradient(135deg, #b91c1c, #7f1d1d); color: white; }
 
-        .bias-very-bullish { color: #10b981; }
-        .bias-bullish { color: #34d399; }
-        .bias-bearish { color: #f87171; }
-        .bias-very-bearish { color: #ef4444; }
-
         .score-2 {
             background-color: #065f46 !important;
             color: #fff;
@@ -307,6 +252,66 @@
             display: block;
             padding: 4px;
             border-radius: 4px;
+            cursor: help;
+        }
+
+        /* Tooltip Styles */
+        .tooltip {
+            position: absolute;
+            background: #1a1d29;
+            border: 2px solid #3b82f6;
+            border-radius: 8px;
+            padding: 15px;
+            min-width: 300px;
+            max-width: 400px;
+            z-index: 1000;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .tooltip.show {
+            opacity: 1;
+        }
+
+        .tooltip-title {
+            font-weight: 700;
+            font-size: 14px;
+            color: #3b82f6;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #3a3f5c;
+            padding-bottom: 6px;
+        }
+
+        .tooltip-score {
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 8px;
+        }
+
+        .tooltip-description {
+            color: #cbd5e0;
+            margin-bottom: 10px;
+        }
+
+        .tooltip-implication {
+            color: #9ca3af;
+            font-size: 12px;
+            font-style: italic;
+            border-top: 1px solid #3a3f5c;
+            padding-top: 8px;
+            margin-top: 8px;
+        }
+
+        .tooltip-bullish {
+            border-color: #10b981;
+        }
+
+        .tooltip-bearish {
+            border-color: #ef4444;
         }
 
         tr:hover td:not(.symbol-cell):not(.bias-cell):not(.score-cell) {
@@ -382,29 +387,6 @@
                 opacity: 1;
             }
         }
-
-        @media (max-width: 768px) {
-            .container {
-                border-radius: 0;
-            }
-
-            body {
-                padding: 0;
-            }
-
-            .header h1 {
-                font-size: 1.4em;
-            }
-
-            .table-wrapper {
-                padding: 10px;
-            }
-
-            th, td {
-                padding: 8px 4px;
-                font-size: 11px;
-            }
-        }
     </style>
 </head>
 <body>
@@ -425,21 +407,6 @@
             <div class="update-info">
                 Last Update: <span id="updateTime">Never</span>
             </div>
-        </div>
-
-        <div class="config-section" id="apiConfig" style="display: none;">
-            <h3>Google Sheets Configuration</h3>
-            <div class="api-input-group">
-                <div class="input-wrapper">
-                    <label>Spreadsheet ID</label>
-                    <input type="text" id="spreadsheetId" placeholder="Ex: 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms">
-                    <div class="help-text">
-                        💡 Găsești ID-ul în URL-ul spreadsheet-ului: 
-                        https://docs.google.com/spreadsheets/d/<strong>SPREADSHEET_ID</strong>/edit
-                    </div>
-                </div>
-            </div>
-            <button class="btn btn-primary" onclick="saveAndLoad()">💾 Save & Load Data</button>
         </div>
 
         <div class="table-wrapper">
@@ -509,7 +476,7 @@
         </div>
 
         <div class="update-info">
-            <p style="margin-bottom: 10px;"><strong>Legend:</strong></p>
+            <p style="margin-bottom: 10px;"><strong>💡 Hover over any score for detailed explanation</strong></p>
             <p style="font-size: 12px; line-height: 1.6;">
                 <strong>Spec1:</strong> Iron Ore (AUD), Oil (CAD), Dairy (NZD), Tankan (JPY), ESI (EUR), Wage Growth (GBP), KOF (CHF)<br>
                 <strong>Spec2:</strong> Industrial Production (EUR), Claims Differential (GBP vs USD)
@@ -518,11 +485,160 @@
     </div>
 
     <div class="toast" id="toast"></div>
+    <div class="tooltip" id="tooltip"></div>
 
     <script>
         const SPREADSHEET_ID = '1hKq-Slzo-FMO9OXMvLJx-Ex4p0fU_OnJzRx1biNanw0';
 
         let currentData = [];
+
+        // Tooltip explanations database
+        const tooltipData = {
+            gdp: {
+                name: "GDP Growth",
+                description: "Gross Domestic Product measures the total economic output. Higher GDP growth indicates a stronger economy.",
+                '+2': "Very strong growth (>3%). Economy expanding rapidly. 📈 Bullish for currency - attracts investment, higher interest rate expectations.",
+                '+1': "Solid growth (2-3%). Economy expanding steadily. 🟢 Moderately bullish - healthy expansion supports currency.",
+                '0': "Moderate growth (1-2%). Economy stable but not accelerating. ⚪ Neutral - neither strong bullish nor bearish signal.",
+                '-1': "Weak growth (0-1%). Economy barely growing. 🟡 Bearish - may pressure currency, rate cut expectations rise.",
+                '-2': "Contraction (<0%). Economy shrinking. 🔴 Very bearish - recession risk, currency typically weakens."
+            },
+            cpi: {
+                name: "CPI (Consumer Price Index)",
+                description: "Measures inflation - the rate at which prices for goods and services rise. Central banks watch this closely.",
+                '+2': "High inflation (>3%). Prices rising fast. 📈 Bullish short-term - central bank likely to raise rates to combat inflation.",
+                '+1': "Moderate inflation (2-3%). Near central bank target. 🟢 Slightly bullish - healthy inflation supports rate stability.",
+                '0': "Low inflation (1-2%). Below target. ⚪ Neutral - neither strong pressure for rate hikes nor cuts.",
+                '-1': "Very low inflation (0.5-1%). Below target. 🟡 Bearish - central bank may cut rates to stimulate economy.",
+                '-2': "Deflation (<0.5%). Falling prices. 🔴 Very bearish - economy at risk, rate cuts likely, currency weakens."
+            },
+            ppi: {
+                name: "PPI (Producer Price Index)",
+                description: "Measures wholesale/producer-level prices. Leading indicator for consumer inflation.",
+                '+2': "Strong producer inflation (>3%). Production costs rising sharply. 📈 Bullish - likely to pass through to CPI, rate hike pressure.",
+                '+1': "Moderate producer inflation (2-3%). &#128994; Moderately bullish - some inflationary pressure building.",
+                '0': "Low producer inflation (0.5-2%). ⚪ Neutral - stable production costs.",
+                '-1': "Deflation (-1 to 0.5%). Production costs falling. 🟡 Bearish - weak demand, economy slowing.",
+                '-2': "Strong deflation (<-1%). Severe cost declines. 🔴 Very bearish - economic distress signal."
+            },
+            unemployment: {
+                name: "Unemployment Rate",
+                description: "Percentage of workforce without jobs. Lower unemployment = stronger economy (but calibrated per region).",
+                '+2': "Very low unemployment. Labor market extremely tight. 📈 Bullish - economy strong, wage pressure, potential rate hikes.",
+                '+1': "Low unemployment. Healthy labor market. 🟢 Moderately bullish - economy doing well, supports currency.",
+                '0': "Normal unemployment. Balanced labor market. ⚪ Neutral - neither too hot nor too cold.",
+                '-1': "Elevated unemployment. Labor market weakening. 🟡 Bearish - economic slowdown, rate cut risk.",
+                '-2': "Very high unemployment. Labor crisis. 🔴 Very bearish - severe economic weakness, currency pressure."
+            },
+            rates: {
+                name: "Interest Rates",
+                description: "Central bank policy rate. Higher rates attract foreign capital, supporting the currency.",
+                '+2': "Large rate hike (+0.5%+). 📈 Very bullish - aggressive tightening, currency typically rallies strongly.",
+                '+1': "Rate hike (+0.25%). 🟢 Bullish - tightening policy supports currency via higher yields.",
+                '0': "Rates unchanged. ⚪ Neutral - policy on hold, no immediate currency impact from rates.",
+                '-1': "Rate cut (-0.25%). 🟡 Bearish - easing policy, lower yields pressure currency.",
+                '-2': "Large rate cut (-0.5%+). 🔴 Very bearish - aggressive easing, currency typically weakens significantly."
+            },
+            mpmi: {
+                name: "Manufacturing PMI",
+                description: "Purchasing Managers' Index for manufacturing. Above 50 = expansion, below 50 = contraction.",
+                '+2': "Strong expansion (55+). Manufacturing booming. 📈 Very bullish - industrial strength supports economy and currency.",
+                '+1': "Moderate expansion (52-55). Solid manufacturing growth. 🟢 Bullish - healthy industrial activity.",
+                '0': "Marginal expansion (50-52). Manufacturing barely growing. ⚪ Neutral - not strong enough to be bullish.",
+                '-1': "Contraction (45-50). Manufacturing shrinking. 🟡 Bearish - industrial weakness pressures economy.",
+                '-2': "Severe contraction (<45). Manufacturing collapsing. 🔴 Very bearish - major economic headwind."
+            },
+            spmi: {
+                name: "Services PMI",
+                description: "Purchasing Managers' Index for services sector. Above 50 = expansion, below 50 = contraction.",
+                '+2': "Strong expansion (55+). Services booming. 📈 Very bullish - most of modern economy is services.",
+                '+1': "Moderate expansion (52-55). Solid services growth. 🟢 Bullish - healthy activity.",
+                '0': "Marginal expansion (50-52). Services barely growing. ⚪ Neutral - weak momentum.",
+                '-1': "Contraction (45-50). Services shrinking. 🟡 Bearish - consumer/business activity weakening.",
+                '-2': "Severe contraction (<45). Services collapsing. 🔴 Very bearish - economy in trouble."
+            },
+            retail: {
+                name: "Retail Sales",
+                description: "Measures consumer spending at retail level. Consumer spending drives 60-70% of GDP in developed economies.",
+                '+2': "Strong growth (>0.5% MoM). Consumers spending heavily. 📈 Very bullish - robust demand supports economy.",
+                '+1': "Moderate growth (0.2-0.5%). Steady consumer spending. 🟢 Bullish - healthy consumption.",
+                '0': "Flat (-0.2 to 0.2%). Stagnant spending. ⚪ Neutral - consumers cautious.",
+                '-1': "Declining (-0.5 to -0.2%). Consumers cutting back. 🟡 Bearish - demand weakening.",
+                '-2': "Sharp decline (<-0.5%). Consumer spending collapsing. 🔴 Very bearish - recession signal."
+            },
+            consumer: {
+                name: "Consumer Confidence",
+                description: "Survey measuring how optimistic consumers are. Higher confidence → more spending → stronger economy.",
+                '+2': "Very high confidence (>100). Consumers very optimistic. 📈 Bullish - strong spending likely ahead.",
+                '+1': "Good confidence (90-100). Consumers moderately optimistic. 🟢 Moderately bullish.",
+                '0': "Neutral confidence (80-90). Consumers uncertain. ⚪ Neutral - could go either way.",
+                '-1': "Low confidence (70-80). Consumers pessimistic. 🟡 Bearish - spending likely to weaken.",
+                '-2': "Very low confidence (<70). Consumers very pessimistic. 🔴 Very bearish - spending will contract."
+            },
+            employment: {
+                name: "Employment Change / NFP",
+                description: "Net new jobs created. For US: Non-Farm Payrolls (NFP). For others: Employment Change. More jobs = stronger economy.",
+                '+2': "Very strong job growth. Labor market booming. 📈 Very bullish - economy creating lots of jobs, currency strength.",
+                '+1': "Solid job growth. Healthy hiring. 🟢 Bullish - positive economic momentum.",
+                '0': "Modest job growth. Stable employment. ⚪ Neutral - neither hot nor cold labor market.",
+                '-1': "Weak job growth or losses. Hiring slowing. 🟡 Bearish - economic weakness emerging.",
+                '-2': "Large job losses. Labor market collapsing. 🔴 Very bearish - severe economic distress."
+            },
+            trend: {
+                name: "Technical Trend",
+                description: "Price action vs moving averages (SMA 20/50). Captures market momentum and positioning.",
+                '+2': "Strong uptrend. Price > SMA20 > SMA50, both rising. 📈 Very bullish technical setup.",
+                '+1': "Uptrend. Price > SMA20, moderate momentum. 🟢 Bullish technical picture.",
+                '0': "Neutral/Sideways. Price between MAs or choppy. ⚪ No clear technical direction.",
+                '-1': "Downtrend. Price < SMA20, negative momentum. 🟡 Bearish technical setup.",
+                '-2': "Strong downtrend. Price < SMA20 < SMA50, both falling. 🔴 Very bearish technicals."
+            },
+            seasonality: {
+                name: "Seasonality",
+                description: "Historical patterns - certain months tend to be bullish or bearish based on 10-20 years of data.",
+                '+2': "Very strong seasonal bullish period. 📈 History strongly favors strength this month.",
+                '+1': "Moderate seasonal bullish period. 🟢 History slightly favors strength.",
+                '0': "Neutral seasonal period. ⚪ No strong historical pattern.",
+                '-1': "Moderate seasonal bearish period. 🟡 History slightly favors weakness.",
+                '-2': "Very strong seasonal bearish period. 🔴 History strongly favors weakness this month."
+            },
+            cot: {
+                name: "COT (Commitment of Traders)",
+                description: "Institutional positioning from CFTC report. Shows how large speculators (banks, hedge funds) are positioned.",
+                '+2': "Very net long. Institutions heavily bullish. 📈 Smart money positioned for upside.",
+                '+1': "Net long. Institutions moderately bullish. 🟢 Positive institutional positioning.",
+                '0': "Neutral positioning. Balanced institutional flows. ⚪ No strong directional bias.",
+                '-1': "Net short. Institutions moderately bearish. 🟡 Negative institutional positioning.",
+                '-2': "Very net short. Institutions heavily bearish. 🔴 Smart money positioned for downside."
+            },
+            crowd: {
+                name: "Crowd Sentiment (Retail)",
+                description: "Retail trader positioning. CONTRARIAN indicator - retail traders are usually wrong at extremes!",
+                '+2': "70%+ retail SHORT. 📈 Bullish signal! Crowds bearish = fade them = go LONG.",
+                '+1': "60-70% retail SHORT. 🟢 Moderately bullish - lean against crowd.",
+                '0': "Balanced 50-60%. ⚪ Neutral - no strong crowd extreme to fade.",
+                '-1': "60-70% retail LONG. 🟡 Bearish signal - crowds getting bullish = be cautious.",
+                '-2': "70%+ retail LONG. 🔴 Very bearish! Crowds very bullish = fade them = go SHORT."
+            },
+            special1: {
+                name: "Special Indicator 1",
+                description: "Currency-specific indicator: Iron Ore (AUD), Oil (CAD), Dairy (NZD), Tankan (JPY), ESI (EUR), Wage Growth (GBP), KOF (CHF).",
+                '+2': "Very bullish signal from special indicator. 📈 Strong positive factor for this currency.",
+                '+1': "Bullish signal. 🟢 Positive factor.",
+                '0': "Neutral. ⚪ No impact.",
+                '-1': "Bearish signal. 🟡 Negative factor.",
+                '-2': "Very bearish signal. 🔴 Strong negative factor for this currency."
+            },
+            special2: {
+                name: "Special Indicator 2",
+                description: "Secondary currency-specific indicator: Industrial Production (EUR), Claims Differential (GBP).",
+                '+2': "Very bullish signal. 📈 Strong positive factor.",
+                '+1': "Bullish signal. 🟢 Positive factor.",
+                '0': "Neutral. ⚪ No impact.",
+                '-1': "Bearish signal. 🟡 Negative factor.",
+                '-2': "Very bearish signal. 🔴 Strong negative factor."
+            }
+        };
 
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
@@ -634,6 +750,54 @@
             return 'score-0';
         }
 
+        function showTooltip(event, indicator, score, symbol) {
+            const tooltip = document.getElementById('tooltip');
+            const data = tooltipData[indicator];
+            
+            if (!data) return;
+            
+            const scoreKey = score > 0 ? `+${score}` : `${score}`;
+            const explanation = data[scoreKey] || data.description;
+            
+            const isBullish = score > 0;
+            const isBearish = score < 0;
+            
+            tooltip.innerHTML = `
+                <div class="tooltip-title">${data.name} - ${symbol}</div>
+                <div class="tooltip-score" style="color: ${isBullish ? '#10b981' : isBearish ? '#ef4444' : '#9ca3af'}">
+                    Score: ${score > 0 ? '+' : ''}${score}
+                </div>
+                <div class="tooltip-description">${data.description}</div>
+                <div class="tooltip-implication">${explanation}</div>
+            `;
+            
+            tooltip.className = `tooltip show ${isBullish ? 'tooltip-bullish' : isBearish ? 'tooltip-bearish' : ''}`;
+            
+            // Position tooltip
+            const rect = event.target.getBoundingClientRect();
+            const tooltipRect = tooltip.getBoundingClientRect();
+            
+            let left = rect.left + window.scrollX;
+            let top = rect.bottom + window.scrollY + 10;
+            
+            // Adjust if tooltip goes off screen
+            if (left + 300 > window.innerWidth) {
+                left = window.innerWidth - 310;
+            }
+            
+            if (top + tooltipRect.height > window.innerHeight + window.scrollY) {
+                top = rect.top + window.scrollY - tooltipRect.height - 10;
+            }
+            
+            tooltip.style.left = left + 'px';
+            tooltip.style.top = top + 'px';
+        }
+
+        function hideTooltip() {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.classList.remove('show');
+        }
+
         function displayData(data) {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
@@ -644,28 +808,34 @@
                 const scoreClass = getWeightedScoreClass(item.score);
                 const scoreSign = item.score > 0 ? '+' : '';
                 
+                const createScoreCell = (indicator, value) => {
+                    return `<span class="score-value ${getScoreClass(value)}" 
+                                  onmouseenter="showTooltip(event, '${indicator}', ${value}, '${item.symbol}')"
+                                  onmouseleave="hideTooltip()">${value > 0 ? '+' : ''}${value}</span>`;
+                };
+                
                 row.innerHTML = `
                     <td class="symbol-cell">${item.symbol}</td>
                     <td class="bias-cell">${item.bias}</td>
                     <td class="score-cell">
                         <span class="weighted-score ${scoreClass}">${scoreSign}${item.score.toFixed(1)}</span>
                     </td>
-                    <td><span class="score-value ${getScoreClass(item.trend)}">${item.trend > 0 ? '+' : ''}${item.trend}</span></td>
-                    <td><span class="score-value ${getScoreClass(item.seasonality)}">${item.seasonality > 0 ? '+' : ''}${item.seasonality}</span></td>
-                    <td><span class="score-value ${getScoreClass(item.cot)}">${item.cot > 0 ? '+' : ''}${item.cot}</span></td>
-                    <td><span class="score-value ${getScoreClass(item.crowd)}">${item.crowd > 0 ? '+' : ''}${item.crowd}</span></td>
-                    <td><span class="score-value ${getScoreClass(item.gdp)}">${item.gdp > 0 ? '+' : ''}${item.gdp}</span></td>
-                    <td><span class="score-value ${getScoreClass(item.mpmi)}">${item.mpmi > 0 ? '+' : ''}${item.mpmi}</span></td>
-                    <td><span class="score-value ${getScoreClass(item.spmi)}">${item.spmi > 0 ? '+' : ''}${item.spmi}</span></td>
-                    <td><span class="score-value ${getScoreClass(item.retail)}">${item.retail > 0 ? '+' : ''}${item.retail}</span></td>
-                    <td><span class="score-value ${getScoreClass(item.consumer)}">${item.consumer > 0 ? '+' : ''}${item.consumer}</span></td>
-                    <td><span class="score-value ${getScoreClass(item.cpi)}">${item.cpi > 0 ? '+' : ''}${item.cpi}</span></td>
-                    <td><span class="score-value ${getScoreClass(item.ppi)}">${item.ppi > 0 ? '+' : ''}${item.ppi}</span></td>
-                    <td><span class="score-value ${getScoreClass(item.unemployment)}">${item.unemployment > 0 ? '+' : ''}${item.unemployment}</span></td>
-                    <td><span class="score-value ${getScoreClass(item.rates)}">${item.rates > 0 ? '+' : ''}${item.rates}</span></td>
-                    <td><span class="score-value ${getScoreClass(item.employment)}">${item.employment > 0 ? '+' : ''}${item.employment}</span></td>
-                    <td><span class="score-value ${getScoreClass(item.special1)}">${item.special1 > 0 ? '+' : ''}${item.special1 !== 0 ? item.special1 : '-'}</span></td>
-                    <td><span class="score-value ${getScoreClass(item.special2)}">${item.special2 > 0 ? '+' : ''}${item.special2 !== 0 ? item.special2 : '-'}</span></td>
+                    <td>${createScoreCell('trend', item.trend)}</td>
+                    <td>${createScoreCell('seasonality', item.seasonality)}</td>
+                    <td>${createScoreCell('cot', item.cot)}</td>
+                    <td>${createScoreCell('crowd', item.crowd)}</td>
+                    <td>${createScoreCell('gdp', item.gdp)}</td>
+                    <td>${createScoreCell('mpmi', item.mpmi)}</td>
+                    <td>${createScoreCell('spmi', item.spmi)}</td>
+                    <td>${createScoreCell('retail', item.retail)}</td>
+                    <td>${createScoreCell('consumer', item.consumer)}</td>
+                    <td>${createScoreCell('cpi', item.cpi)}</td>
+                    <td>${createScoreCell('ppi', item.ppi)}</td>
+                    <td>${createScoreCell('unemployment', item.unemployment)}</td>
+                    <td>${createScoreCell('rates', item.rates)}</td>
+                    <td>${createScoreCell('employment', item.employment)}</td>
+                    <td>${item.special1 !== 0 ? createScoreCell('special1', item.special1) : '<span class="score-value score-0">-</span>'}</td>
+                    <td>${item.special2 !== 0 ? createScoreCell('special2', item.special2) : '<span class="score-value score-0">-</span>'}</td>
                 `;
                 
                 tbody.appendChild(row);
